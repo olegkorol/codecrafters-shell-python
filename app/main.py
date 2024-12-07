@@ -1,9 +1,11 @@
 import sys
 import os
+import subprocess
 
 valid_commands = ["exit", "echo", "type"]
 
 def main():
+    command = None
     args = []
     PATH = os.environ.get("PATH", "").split(":")
 
@@ -12,14 +14,14 @@ def main():
     """
     def cmd_echo():
         nonlocal args
-        print(" ".join(args[1:]))
+        print(" ".join(args))
 
     """
     cmd: exit
     """
     def cmd_exit():
         nonlocal args
-        if args[1] and args[1] == 1:
+        if args and (args[0] == 1 or not args[0]):
             sys.exit(1)
         else:
             sys.exit(0)
@@ -28,20 +30,27 @@ def main():
     cmd: type
     """
     def cmd_type():
-        nonlocal args, PATH
+        nonlocal command, args, PATH
 
-        if args[1] in valid_commands: # builtin command
-            sys.stdout.write(f"{args[1]} is a shell builtin\n")
+        if args[0] in valid_commands: # builtin command
+            sys.stdout.write(f"{args[0]} is a shell builtin\n")
         else:
             # Search for command in PATH
-            cmd_path = None
-            for path in PATH:
-                if os.path.isfile(f"{path}/{args[1]}"):
-                    cmd_path = f"{path}/{args[1]}"
+            cmd_path = get_executable_path(args[0])
             if cmd_path: # PATH command
-                sys.stdout.write(f"{args[1]} is {cmd_path}\n")
+                sys.stdout.write(f"{args[0]} is {cmd_path}\n")
             else: # not found
-                sys.stdout.write(f"{args[1]}: not found\n")
+                sys.stdout.write(f"{args[0]}: not found\n")
+
+    def get_executable_path(cmd: str):
+        nonlocal PATH
+        cmd_path = None
+
+        for path in PATH:
+            if os.path.isfile(f"{path}/{cmd}"):
+                cmd_path = f"{path}/{cmd}"
+
+        return cmd_path
 
     ##############
     # Main logic #
@@ -51,23 +60,25 @@ def main():
         sys.stdout.flush()
 
         # Wait for user input
-        args = input().split(" ")
+        command, *args = input().split(" ")
 
         # Check user input
-        if not args[0] or args[0] not in valid_commands:
-            sys.stdout.write(f"{args[0]}: command not found\n")
+        if not command:
             continue
 
-        # Run user commands
-        if args[0] == "exit":
-            cmd_exit()
-
-        if args[0] == "echo":
-            cmd_echo()
-
-        if args[0] == "type":
-            cmd_type()
-
+        match command:
+            case "exit":
+                cmd_exit()
+            case "echo":
+                cmd_echo()
+            case "type":
+                cmd_type()
+            case _:
+                if executable_path := get_executable_path(command):
+                    subprocess.run([executable_path, *args])
+                else:
+                    sys.stdout.write(f"{command}: not found\n")
+         
 
 
 if __name__ == "__main__":
