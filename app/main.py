@@ -3,7 +3,7 @@ import os
 import subprocess
 import shlex
 
-valid_commands = ["exit", "echo", "type"]
+valid_commands = ["exit", "echo", "type", "pwd"]
 
 def main():
     command = None
@@ -43,6 +43,12 @@ def main():
             else: # not found
                 sys.stdout.write(f"{args[0]}: not found\n")
 
+    """
+    cmd: pwd
+    """
+    def cmd_pwd():
+        sys.stdout.write(f"{os.getcwd()}\n")
+
     def get_executable_path(cmd: str):
         nonlocal PATH
         cmd_path = None
@@ -74,6 +80,8 @@ def main():
                 cmd_echo()
             case "type":
                 cmd_type()
+            case "pwd":
+                cmd_pwd()
             case _:
                 if executable_path := get_executable_path(command):
                     subprocess.run([executable_path, *args])
