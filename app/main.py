@@ -3,7 +3,7 @@ import os
 import subprocess
 import shlex
 
-valid_commands = ["exit", "echo", "type", "pwd"]
+valid_commands = ["exit", "echo", "type", "pwd", "cd"]
 
 def main():
     command = None
@@ -49,6 +49,26 @@ def main():
     def cmd_pwd():
         sys.stdout.write(f"{os.getcwd()}\n")
 
+    """
+    cmd: cd
+    """
+    def cmd_cd():
+        nonlocal args
+
+        if not args or not args[0]:
+            return
+
+        try:
+            path = os.path.expanduser(args[0])
+            os.chdir(path)
+        except FileNotFoundError:
+            sys.stdout.write(f"cd: {args[0]}: No such file or directory\n")
+        except NotADirectoryError:
+            sys.stdout.write(f"cd: {args[0]}: Not a directory\n")
+
+
+    # Helper functions
+
     def get_executable_path(cmd: str):
         nonlocal PATH
         cmd_path = None
@@ -82,6 +102,8 @@ def main():
                 cmd_type()
             case "pwd":
                 cmd_pwd()
+            case "cd":
+                cmd_cd()
             case _:
                 if executable_path := get_executable_path(command):
                     subprocess.run([executable_path, *args])
