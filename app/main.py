@@ -1,14 +1,18 @@
 import sys
 
+valid_commands = ['cd']
 
 def main():
-    # Uncomment this block to pass the first stage
-    sys.stdout.write("$ ")
+    while True:
+        sys.stdout.write("$ ")
+        sys.stdout.flush()
 
-    # Wait for user input
-    command = input()
+        # Wait for user input
+        command = input()
 
-    sys.stdout.write(f"{command}: command not found\n")
+        if command not in valid_commands:
+            print(f"{command}: command not found")
+            continue
 
 
 if __name__ == "__main__":
