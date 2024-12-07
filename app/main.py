@@ -1,6 +1,7 @@
 import sys
 import os
 import subprocess
+import shlex
 
 valid_commands = ["exit", "echo", "type"]
 
@@ -60,7 +61,7 @@ def main():
         sys.stdout.flush()
 
         # Wait for user input
-        command, *args = input().split(" ")
+        command, *args = shlex.split(input()) # shlex used to handle single-quotes better
 
         # Check user input
         if not command:
