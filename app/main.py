@@ -1,6 +1,6 @@
 import sys
 
-valid_commands = ["exit"]
+valid_commands = ["exit", "echo"]
 
 def main():
     while True:
@@ -21,6 +21,17 @@ def main():
             else:
                 sys.exit(0)
 
+        if command[0] == "echo":
+            print_string_from_list(command[1::])
+
+def print_string_from_list(lst: list):
+    str = ""
+    for word in lst:
+        if not lst[-1] == word:
+            str += word + " "
+        else:
+            str += word
+    print(f"{str}")
 
 if __name__ == "__main__":
     main()
